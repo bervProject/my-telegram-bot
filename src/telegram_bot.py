@@ -72,4 +72,6 @@ def convert_pdf(pdf_byte, user_id):
         list_location.append(image_name)
     return list_location
 
-bot.polling()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=os.environ['PORT'])
+    bot.polling()
