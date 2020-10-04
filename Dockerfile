@@ -7,4 +7,4 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 ENV FLASK_APP=src/telegram_bot.py
-CMD [ "sh", "-c", "python -m flask run -p ${PORT}" ]
+CMD [ "python", "-m", "flask run" ]
