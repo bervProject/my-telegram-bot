@@ -23,14 +23,15 @@ def handle_start_help(message):
 @bot.message_handler(func=test_pdf, content_types=['document'])
 def handle_message_doc(message):
     chat_id = message.chat.id
+    message_id = message.message_id
     user_id = message.from_user.id
     file_id = message.document.file_id
-    logger.info('get message {} from {} with file {}'.format(chat_id, user_id, file_id))
+    logger.info('get message {},{} from {} with file {}'.format(message_id, chat_id, user_id, file_id))
     file_info = bot.get_file(file_id)
     doc_downloaded = bot.download_file(file_info.file_path)
     medias_plain = convert_pdf(doc_downloaded, user_id)
     medias = [types.InputMediaPhoto(x) for x in medias_plain]
-    bot.send_media_group(chat_id, medias, reply_to_message_id=chat_id)
+    bot.send_media_group(chat_id, medias, reply_to_message_id=message_id)
     for media in medias_plain:
         os.remove(media)    
 
