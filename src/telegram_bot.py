@@ -68,7 +68,7 @@ def convert_pdf(pdf_byte, user_id):
         list_location.append(image_name)
     return list_location
 
-@server.route('/' + TOKEN, methods=['POST'])
+@app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     return "!", 200
