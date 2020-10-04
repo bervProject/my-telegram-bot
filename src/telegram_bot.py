@@ -20,6 +20,10 @@ def test_pdf(message):
 def handle_start_help(message):
     bot.reply_to(message, 'Please upload .pdf file to use this bot')
 
+@bot.message_handler(content_types=['photo', 'audio', 'sticker'])
+def not_supported_yet(message):
+    bot.reply_to(message, 'Sorry, we not supported this yet')
+
 @bot.message_handler(func=test_pdf, content_types=['document'])
 def handle_message_doc(message):
     chat_id = message.chat.id
