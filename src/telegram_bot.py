@@ -39,7 +39,7 @@ def handle_message_doc(message):
     doc_downloaded = bot.download_file(file_info.file_path)
     medias_plain = convert_pdf(doc_downloaded, user_id)
     open_file_list = [open(x, 'rb') for x in medias_plain]
-    medias = [InputMediaPhoto(x) for x in medias_plain]
+    medias = [InputMediaPhoto(x) for x in open_file_list]
     bot.send_media_group(chat_id, medias, reply_to_message_id=message_id)
     # close the files
     for file in open_file_list:
