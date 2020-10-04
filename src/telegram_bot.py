@@ -1,5 +1,6 @@
 from pdf2image import convert_from_bytes
 from telebot.types import InputMediaPhoto
+from flask import Flask
 import io
 import os
 import uuid
@@ -7,6 +8,12 @@ import zipfile
 import errno
 import telebot
 import logging
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello World! This is my telegram bot.'
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG)
