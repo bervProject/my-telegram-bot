@@ -1,7 +1,8 @@
-FROM python:3.8-alpine
+FROM python:3.8-slim
 
 WORKDIR /usr/src/app
-RUN apk update && apk add --no-cache poppler-utils
+RUN apt-get update && apt-get -y install --no-cache poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
