@@ -14,6 +14,7 @@ app = Flask(__name__)
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG)
 token = os.environ.get("TELEGRAM_TOKEN", "")
+public_url = os.environ.get("PUBLIC_URL", "http://localhost:5000")
 bot = telebot.TeleBot(token)
 
 def test_pdf(message):
@@ -73,11 +74,15 @@ def getMessage():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     return "!", 200
 
-@app.route("/")
+@app.route("/reset-hook")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url='https://my-bot-python.herokuapp.com/' + token)
-    return "!", 200
+    bot.set_webhook(url=public_url + token)
+    return "Success to reset hook"
+
+@app.route("/")
+def home():
+    return "Welcome to My Telegram Bot"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
