@@ -23,4 +23,4 @@ jobs:
     - name: Show docker container
       run: docker ps -a
     - name: Check curl
-      run: curl -I http://localhost:5000
+      run: curl -v http://localhost:5000
