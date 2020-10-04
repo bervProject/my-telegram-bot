@@ -6,18 +6,26 @@ import uuid
 import zipfile
 import errno
 import telebot
+import logging
 
+logger = telebot.logger
+telebot.logger.setLevel(logging.DEBUG)
 token = os.environ["TELEGRAM_TOKEN"]
 bot = telebot.TeleBot(token)
 
 def test_pdf(message):
     return message.document.mime_type == 'application/pdf'
 
+@bot.message_handler(commands=['start','help'])
+def handle_start_help(message):
+    bot.reply_to(message, 'Please upload .pdf file to use this bot')
+
 @bot.message_handler(func=test_pdf, content_types=['document'])
 def handle_message_doc(message):
     chat_id = message.chat.id
     user_id = message.from_user.id
     file_id = message.document.file_id
+    logger.info('get message {} from {} with file {}'.format(chat_id, user_id, file_id))
     file_info = bot.get_file(file_id)
     doc_downloaded = bot.download_file(file_info.file_path)
     medias_plain = convert_pdf(doc_downloaded, user_id)
