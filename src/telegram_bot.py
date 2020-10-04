@@ -11,13 +11,9 @@ import logging
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello_world():
-    return 'Hello World! This is my telegram bot.'
-
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG)
-token = os.environ["TELEGRAM_TOKEN"]
+token = os.environ.get("TELEGRAM_TOKEN", "")
 bot = telebot.TeleBot(token)
 
 def test_pdf(message):
@@ -72,5 +68,16 @@ def convert_pdf(pdf_byte, user_id):
         list_location.append(image_name)
     return list_location
 
+@server.route('/' + TOKEN, methods=['POST'])
+def getMessage():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "!", 200
+
+@app.route("/")
+def webhook():
+    bot.remove_webhook()
+    bot.set_webhook(url='https://my-bot-python.herokuapp.com' + token)
+    return "!", 200
+
 if __name__ == '__main__':
-    bot.polling()
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
