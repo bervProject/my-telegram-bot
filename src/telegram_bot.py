@@ -14,6 +14,10 @@ token = os.environ["TELEGRAM_TOKEN"]
 bot = telebot.TeleBot(token)
 
 def test_pdf(message):
+    if message is None:
+        return False
+    if message.document is None:
+        return False
     return message.document.mime_type == 'application/pdf'
 
 @bot.message_handler(commands=['start','help'])
