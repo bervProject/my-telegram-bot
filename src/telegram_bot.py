@@ -42,3 +42,5 @@ def convert_pdf(pdf_byte, user_id):
         image.save(image_name, format='JPEG')
         list_location.append(image_name)
     return list_location
+
+bot.polling()
