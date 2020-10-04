@@ -73,5 +73,4 @@ def convert_pdf(pdf_byte, user_id):
     return list_location
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=os.environ['PORT'])
     bot.polling()
