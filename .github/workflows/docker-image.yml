@@ -22,5 +22,3 @@ jobs:
       run: docker logs my_telegram_bot
     - name: Show docker container
       run: docker ps -a
-    - name: Check curl
-      run: curl -v http://localhost:5000
