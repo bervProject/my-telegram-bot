@@ -1,5 +1,5 @@
 from pdf2image import convert_from_bytes
-from telebot import types
+from telebot.types import InputMediaPhoto
 import io
 import os
 import uuid
@@ -38,8 +38,13 @@ def handle_message_doc(message):
     file_info = bot.get_file(file_id)
     doc_downloaded = bot.download_file(file_info.file_path)
     medias_plain = convert_pdf(doc_downloaded, user_id)
-    medias = [types.InputMediaPhoto(x) for x in medias_plain]
+    open_file_list = [open(x, 'rb') for x in medias_plain]
+    medias = [InputMediaPhoto(x) for x in medias_plain]
     bot.send_media_group(chat_id, medias, reply_to_message_id=message_id)
+    # close the files
+    for file in open_file_list:
+        file.close()
+    # remove the files
     for media in medias_plain:
         os.remove(media)    
 
