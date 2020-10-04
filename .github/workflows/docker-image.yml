@@ -18,5 +18,7 @@ jobs:
       run: docker build . --file Dockerfile --tag my-telegram-bot:latest
     - name: Run the Docker Image
       run: docker run -p 5000:5000 -d my-telegram-bot:latest
+    - name: Show docker container
+      run: docker ps -a
     - name: Check curl
       run: curl -I http://localhost:5000
