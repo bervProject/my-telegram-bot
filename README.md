@@ -6,7 +6,7 @@ This is my telegram bot, just for my personal purpose and help my productive sec
 
 | Action |
 |:------:|
-| ![Docker](https://github.com/berviantoleo/my-telegram-bot/workflows/Docker/badge.svg) |
+| ![Docker](https://github.com/bervProject/my-telegram-bot/workflows/Docker/badge.svg) |
 
 ## TODO
 
