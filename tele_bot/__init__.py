@@ -84,7 +84,7 @@ def create_app(test_config = None):
         bot.set_webhook(url=public_url + token)
         return render_template('success-reset.html')
 
-    @app.route("/", methods=('GET'))
+    @app.route("/", methods=['GET'])
     def home():
         return render_template('index.html')
 
