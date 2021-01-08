@@ -1,6 +1,6 @@
 from pdf2image import convert_from_bytes
 from telebot.types import InputMediaPhoto
-from flask import Flask, request
+from flask import Flask, request, render_template
 import io
 import os
 import uuid
@@ -82,10 +82,10 @@ def create_app(test_config = None):
     def webhook():
         bot.remove_webhook()
         bot.set_webhook(url=public_url + token)
-        return "Success to reset hook"
+        return render_template('success-reset.html')
 
-    @app.route("/")
+    @app.route("/", methods=('GET'))
     def home():
-        return "Welcome to My Telegram Bot"
+        return render_template('index.html')
 
     return app
