@@ -9,8 +9,6 @@ import errno
 import telebot
 import logging
 
-app = Flask(__name__)
-
 logger = telebot.logger
 telebot.logger.setLevel(logging.DEBUG)
 token = os.environ.get("TELEGRAM_TOKEN", "")
@@ -50,7 +48,7 @@ def handle_message_doc(message):
         file.close()
     # remove the files
     for media in medias_plain:
-        os.remove(media)    
+        os.remove(media)
 
 def convert_pdf(pdf_byte, user_id):
     images = convert_from_bytes(pdf_byte, fmt="jpeg")
@@ -69,20 +67,25 @@ def convert_pdf(pdf_byte, user_id):
         list_location.append(image_name)
     return list_location
 
-@app.route('/' + token, methods=['POST'])
-def getMessage():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-    return "!", 200
+def create_app(test_config = None):
+    app = Flask(__name__)
+    app.config.from_mapping(
+        SECRET_KEY=os.environ.get('SECRET_KEY', 'dev-key')
+    )
 
-@app.route("/reset-hook")
-def webhook():
-    bot.remove_webhook()
-    bot.set_webhook(url=public_url + token)
-    return "Success to reset hook"
+    @app.route('/' + token, methods=['POST'])
+    def getMessage():
+        bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+        return "!", 200
 
-@app.route("/")
-def home():
-    return "Welcome to My Telegram Bot"
+    @app.route("/reset-hook")
+    def webhook():
+        bot.remove_webhook()
+        bot.set_webhook(url=public_url + token)
+        return "Success to reset hook"
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    @app.route("/")
+    def home():
+        return "Welcome to My Telegram Bot"
+
+    return app
