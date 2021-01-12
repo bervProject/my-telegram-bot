@@ -181,6 +181,7 @@ def create_app(test_config=None):
         return render_template('success-reset.html')
 
     @app.route("/home", methods=['GET'])
+    @login_required
     def home():
         return render_template('home.html')
 
