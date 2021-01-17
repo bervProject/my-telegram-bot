@@ -4,9 +4,9 @@ This is my telegram bot, just for my personal purpose and help my productive sec
 
 ## Build Status
 
-| Action |
-|:------:|
-| ![Docker](https://github.com/bervProject/my-telegram-bot/workflows/Docker/badge.svg) |
+| Github Action (Docker) | Github Action (Python) |
+|:----------------------:|:----------------------:|
+| ![Docker](https://github.com/bervProject/my-telegram-bot/workflows/Docker/badge.svg) | ![Python package](https://github.com/bervProject/my-telegram-bot/workflows/Python%20package/badge.svg) |
 
 ## TODO
 

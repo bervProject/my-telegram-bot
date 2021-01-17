@@ -37,6 +37,7 @@ jobs:
     - name: Test & Coverage
       run: |
         coverage run -m pytest
-        coverage html
+        coverage report -m
+        coverage xml
         bash <(curl -s https://codecov.io/bash)
 
