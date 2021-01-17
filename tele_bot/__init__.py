@@ -108,7 +108,12 @@ def _build_auth_url(authority=None, scopes=None, state=None):
 def create_app(test_config=None):
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
-    app.config.from_object(Config)
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_object(Config)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
     Session(app)
     login = LoginManager(app)
     login.login_view = 'login'
