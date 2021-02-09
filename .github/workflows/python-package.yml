@@ -12,6 +12,7 @@ on:
     branches: [ main ]
 env:
   IMAGE_NAME: my-telegram-bot
+  HEROKU_APP_NAME: my-bot-python
 jobs:
   build:
     runs-on: ubuntu-latest
