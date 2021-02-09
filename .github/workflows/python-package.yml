@@ -12,7 +12,6 @@ on:
     branches: [ main ]
 env:
   IMAGE_NAME: my-telegram-bot
-  HEROKU_APP_NAME: my-bot-python
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -73,22 +72,3 @@ jobs:
           echo VERSION=$VERSION
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
-    - uses: akhileshns/heroku-deploy@v3.10.9 # This is the action
-      if: ${{ github.ref == 'refs/heads/main' }}
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-        heroku_app_name: "" #Must be unique in Heroku
-        heroku_email: "bervianto.leo@gmail.com"
-        justlogin: true
-    - name: Heroku Container Login & Update
-      if: ${{ github.ref == 'refs/heads/main' }}
-      run: |
-        heroku update
-        heroku container:login
-    - name: Push image & Release
-      if: ${{ github.ref == 'refs/heads/main' }}
-      run: |
-        HEROKU_IMAGE=registry.heroku.com/$HEROKU_APP_NAME/web
-        docker tag $IMAGE_NAME $HEROKU_IMAGE
-        docker push $HEROKU_IMAGE
-        heroku container:release web --app=${HEROKU_APP_NAME}
