@@ -14,7 +14,7 @@ env:
   IMAGE_NAME: my-telegram-bot
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.8, 3.9]
@@ -41,9 +41,17 @@ jobs:
         coverage report -m
         coverage xml
         bash <(curl -s https://codecov.io/bash)
+  docker-build:
+    needs: build
+    runs-on: ubuntu-20.04
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME --build-arg NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
   push:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: github.event_name == 'push'
     steps:
     - uses: actions/checkout@v2
