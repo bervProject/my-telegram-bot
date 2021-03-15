@@ -89,7 +89,7 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
     Session(app)
     login = LoginManager(app)
-    login.login_view = 'login'
+    login.login_view = 'auth.login'
 
     @login.user_loader
     def load_user(id):
