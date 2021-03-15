@@ -109,6 +109,7 @@ def create_app(test_config=None):
         app.logger.debug('Someone call reset hook')
         app.logger.debug('Try to remove hook from bot')
         bot.remove_webhook()
+        app.logger.info('Webhook removed')
         app.logger.debug('Setup new webhook to: ' + public_url)
         bot.set_webhook(url=public_url + token)
         app.logger.debug('Finished setup webhook to: ' + public_url)
