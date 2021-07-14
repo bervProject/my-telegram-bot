@@ -49,34 +49,35 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME --build-arg NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
-  push:
+  docker-push:
+    # Ensure test job passes before pushing image.
     needs: build
     runs-on: ubuntu-20.04
     if: github.event_name == 'push'
     steps:
-    - uses: actions/checkout@v2
-    - name: Build image
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME
-    - name: Run the Docker Image
-      run: docker run -p 8000:8000 --name my_telegram_bot -d $IMAGE_NAME
-    - name: Show the logs
-      run: docker logs my_telegram_bot
-    - name: Show docker container
-      run: docker ps -a
-    - name: Log into registry
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
-    - name: Push image
-      run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-          # Change all uppercase to lowercase
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          # Strip "v" prefix from tag name
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+      - uses: actions/checkout@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            bervproject/${{ env.IMAGE_NAME }}
+            ghcr.io/${{ github.repository }}
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
