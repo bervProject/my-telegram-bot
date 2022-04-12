@@ -40,7 +40,8 @@ jobs:
         coverage run -m pytest
         coverage report -m
         coverage xml
-        bash <(curl -s https://codecov.io/bash)
+    - name: Upload Codecov
+      uses: codecov/codecov-action@v2
   docker-build:
     needs: build
     runs-on: ubuntu-20.04
