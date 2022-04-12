@@ -41,7 +41,7 @@ jobs:
         coverage report -m
         coverage xml
     - name: Upload Codecov
-      uses: codecov/codecov-action@v2
+      uses: codecov/codecov-action@v3
   docker-build:
     needs: build
     runs-on: ubuntu-20.04
