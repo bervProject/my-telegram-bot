@@ -6,4 +6,4 @@ msal==1.18.0
 flask-login==0.6.2
 flask-session==0.4.0
 pytest==7.1.2
-coverage==6.4.1
+coverage==6.4.2
