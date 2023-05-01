@@ -5,6 +5,7 @@ from aws_cdk import (
     CfnOutput,
     RemovalPolicy,
     aws_ecr as ecr,
+    Fn,
     aws_secretsmanager as secretsmanager,
 )
 import aws_cdk.aws_apprunner_alpha as apprunner
@@ -37,7 +38,7 @@ class TelegramBotInfraStack(Stack):
         app_runner_output.add_secret("SECRET_KEY", apprunner.Secret.from_secrets_manager(secret=secrets, field="SECRET_KEY"))
         app_runner_output.add_secret("CLIENT_SECRET", apprunner.Secret.from_secrets_manager(secret=secrets, field="CLIENT_SECRET"))
         app_runner_output.add_secret("CLIENT_ID", apprunner.Secret.from_secrets_manager(secret=secrets, field="CLIENT_ID"))
-        app_runner_output.add_environment_variable("PUBLIC_URL", app_runner_output.service_url)
+        app_runner_output.add_secret("PUBLIC_URL", apprunner.Secret.from_secrets_manager(secret=secrets, field="PUBLIC_URL"))
         CfnOutput(self, "apprunner-url", value=app_runner_output.service_url)
 
 
