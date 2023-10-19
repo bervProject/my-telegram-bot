@@ -82,6 +82,8 @@ jobs:
       - name: Deploy Infra
         working-directory: 'infra'
         run: |
-          npm install
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
           cdk deploy TelegramBotInfraStack --parameters "imageTag=sha-${{ github.sha }}" --require-approval never
 
