@@ -83,5 +83,5 @@ jobs:
         working-directory: 'infra'
         run: |
           npm install
-          cdk deploy TmeStack --parameters "imageTag=sha-${{ github.sha }}" --require-approval never
+          cdk deploy TelegramBotInfraStack --parameters "imageTag=sha-${{ github.sha }}" --require-approval never
 
