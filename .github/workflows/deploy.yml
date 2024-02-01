@@ -75,7 +75,7 @@ jobs:
           npm install -g aws-cdk
           cdk doctor
       - name: Prepare App Runner
-        uses: bervProject/prepare-apprunner-action@0.1.3
+        uses: bervProject/prepare-apprunner-action@0.1.4
         with:
           arn: ${{ secrets.ARN }}
           region: 'ap-southeast-1'
