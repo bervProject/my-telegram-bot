@@ -1,4 +1,4 @@
-flask==3.0.0
+flask==3.0.2
 pdf2image==1.17.0
 pyTelegramBotAPI==4.15.4
 gunicorn==21.2.0
