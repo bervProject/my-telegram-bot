@@ -5,6 +5,6 @@ gunicorn==21.2.0
 msal==1.27.0
 flask-login==0.6.3
 flask-session==0.5.0
-pytest==8.0.0
+pytest==8.0.2
 coverage==7.4.1
 Werkzeug==3.0.1
