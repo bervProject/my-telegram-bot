@@ -23,6 +23,6 @@ class Config(object):
     # https://docs.microsoft.com/en-us/graph/permissions-reference
     SCOPE = ["User.Read"]
 
-    SESSION_TYPE = "filesystem"  # So token cache will be stored in server-side session
+    SESSION_TYPE = "cachelib"  # So token cache will be stored in server-side session
 
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key')
