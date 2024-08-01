@@ -2,7 +2,7 @@ flask==3.0.3
 pdf2image==1.17.0
 pyTelegramBotAPI==4.21.0
 gunicorn==22.0.0
-msal==1.28.0
+msal==1.30.0
 flask-login==0.6.3
 flask-session==0.8.0
 pytest==8.2.1
