@@ -7,4 +7,4 @@ flask-login==0.6.3
 flask-session==0.8.0
 pytest==8.3.2
 coverage==7.6.1
-Werkzeug==3.0.3
+Werkzeug==3.0.4
