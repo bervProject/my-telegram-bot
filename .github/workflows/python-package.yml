@@ -40,6 +40,8 @@ jobs:
         coverage run -m pytest
         coverage report -m
         coverage xml
+      env:
+        TELEGRAM_TOKEN: '123:test'
     - name: Upload Codecov
       uses: codecov/codecov-action@v4
   docker-build:
