@@ -1,6 +1,6 @@
 flask==3.1.0
 pdf2image==1.17.0
-pyTelegramBotAPI==4.23.0
+pyTelegramBotAPI==4.24.0
 gunicorn==23.0.0
 msal==1.31.0
 flask-login==0.6.3
