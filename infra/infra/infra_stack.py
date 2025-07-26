@@ -5,7 +5,6 @@ from aws_cdk import (
     CfnOutput,
     RemovalPolicy,
     aws_ecr as ecr,
-    Fn,
     aws_secretsmanager as secretsmanager,
 )
 import aws_cdk.aws_apprunner_alpha as apprunner
@@ -56,7 +55,7 @@ class TelegramBotRepoStack(Stack):
         ecr_bot = ecr.Repository(
             self, "telegram-bot-ecr",
             repository_name="telegram-bot",
-            image_scan_on_push=True,
+            image_scan_on_push=False,
             removal_policy=RemovalPolicy.RETAIN,
             image_tag_mutability=ecr.TagMutability.MUTABLE,
             encryption=ecr.RepositoryEncryption.KMS)
