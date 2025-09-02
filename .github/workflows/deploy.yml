@@ -12,7 +12,7 @@ jobs:
       id-token: write   # This is required for requesting the JWT
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
@@ -59,7 +59,7 @@ jobs:
       id-token: write   # This is required for requesting the JWT
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
