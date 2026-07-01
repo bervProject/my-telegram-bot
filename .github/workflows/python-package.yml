@@ -43,7 +43,7 @@ jobs:
       env:
         TELEGRAM_TOKEN: '123:test'
     - name: Upload Codecov
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@v7
   docker-build:
     needs: build
     runs-on: ubuntu-24.04
