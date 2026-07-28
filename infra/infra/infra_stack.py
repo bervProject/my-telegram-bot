@@ -66,16 +66,11 @@ class TelegramBotInfraStack(Stack):
         image_uri = f"{ecr_bot.repository_uri}:{image_tag.value_as_string}"
 
         # Secrets from Secrets Manager
-        # valueFrom format for a JSON key in Secrets Manager:
-        #   <secret-arn>:<json-key>::
-        # Use Fn.sub so CloudFormation resolves the ARN parameter server-side
-        # before ECS sees the value (avoids the SSM-path misinterpretation).
+        # valueFrom format: <secret-arn>:<json-key>::
         express_secrets = [
-            ecs.CfnExpressGatewayService.SecretProperty(
-                name=name,
-                value_from=Fn.sub(
-                    "${SecretArn}:" + name + "::",
-                    {"SecretArn": secret_arn.value_as_string}))
+            {"name": name, "valueFrom": Fn.sub(
+                "${SecretArn}:" + name + "::",
+                {"SecretArn": secret_arn.value_as_string})}
             for name in [
                 "TELEGRAM_TOKEN",
                 "SECRET_KEY",
@@ -95,28 +90,29 @@ class TelegramBotInfraStack(Stack):
             cpu="256",
             memory="512",
             health_check_path="/",
-            primary_container=ecs.CfnExpressGatewayService.ExpressGatewayContainerProperty(
-                image=image_uri,
-                container_port=80,
-                environment=[
-                    ecs.CfnExpressGatewayService.KeyValuePairProperty(
-                        name="FLASK_ENV", value="production")
-                ],
-                secrets=express_secrets,
-                aws_logs_configuration=ecs.CfnExpressGatewayService.ExpressGatewayServiceAwsLogsConfigurationProperty(
-                    log_group="/aws/ecs/telegram-bot-express",
-                    log_stream_prefix="telegram-bot")),
-            scaling_target=ecs.CfnExpressGatewayService.ExpressGatewayScalingTargetProperty(
-                auto_scaling_metric="REQUEST_COUNT_PER_TARGET",
-                auto_scaling_target_value=20,
-                min_task_count=1,
-                max_task_count=3))
+            primary_container={
+                "image": image_uri,
+                "containerPort": 80,
+                "environment": [{"name": "FLASK_ENV", "value": "production"}],
+                "secrets": express_secrets,
+                "awsLogsConfiguration": {
+                    "logGroup": "/aws/ecs/telegram-bot-express",
+                    "logStreamPrefix": "telegram-bot",
+                },
+            },
+            scaling_target={
+                "autoScalingMetric": "REQUEST_COUNT_PER_TARGET",
+                "autoScalingTargetValue": 20,
+                "minTaskCount": 1,
+                "maxTaskCount": 3,
+            })
 
         express_service.node.add_dependency(task_execution_role)
         express_service.node.add_dependency(task_role)
         express_service.node.add_dependency(infrastructure_role)
 
         CfnOutput(self, "ServiceName", value=express_service.service_name or "telegram-bot-express-service")
+        CfnOutput(self, "ServiceArn", value=express_service.attr_service_arn)
 
 
 '''
