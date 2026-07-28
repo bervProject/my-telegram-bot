@@ -88,7 +88,7 @@ class TelegramBotInfraStack(Stack):
             cpu="256",
             memory="512",
             health_check_path="/",
-            primary_container=ecs.CfnExpressGatewayService.PrimaryContainerProperty(
+            primary_container=ecs.CfnExpressGatewayService.ExpressGatewayContainerProperty(
                 image=image_uri,
                 container_port=80,
                 environment=[
@@ -96,10 +96,10 @@ class TelegramBotInfraStack(Stack):
                         name="FLASK_ENV", value="production")
                 ],
                 secrets=express_secrets,
-                aws_logs_configuration=ecs.CfnExpressGatewayService.AwsLogsConfigurationProperty(
+                aws_logs_configuration=ecs.CfnExpressGatewayService.ExpressGatewayServiceAwsLogsConfigurationProperty(
                     log_group="/aws/ecs/telegram-bot-express",
                     log_stream_prefix="telegram-bot")),
-            scaling_target=ecs.CfnExpressGatewayService.ScalingTargetProperty(
+            scaling_target=ecs.CfnExpressGatewayService.ExpressGatewayScalingTargetProperty(
                 auto_scaling_metric="REQUEST_COUNT_PER_TARGET",
                 auto_scaling_target_value=20,
                 min_task_count=1,
