@@ -1,6 +1,7 @@
 from aws_cdk import (
     Stack,
     Duration,
+    Fn,
     CfnParameter,
     CfnOutput,
     RemovalPolicy,
@@ -65,10 +66,16 @@ class TelegramBotInfraStack(Stack):
         image_uri = f"{ecr_bot.repository_uri}:{image_tag.value_as_string}"
 
         # Secrets from Secrets Manager
+        # valueFrom format for a JSON key in Secrets Manager:
+        #   <secret-arn>:<json-key>::
+        # Use Fn.sub so CloudFormation resolves the ARN parameter server-side
+        # before ECS sees the value (avoids the SSM-path misinterpretation).
         express_secrets = [
             ecs.CfnExpressGatewayService.SecretProperty(
                 name=name,
-                value_from=f"{secret_arn.value_as_string}:{name}::")
+                value_from=Fn.sub(
+                    "${SecretArn}:" + name + "::",
+                    {"SecretArn": secret_arn.value_as_string}))
             for name in [
                 "TELEGRAM_TOKEN",
                 "SECRET_KEY",
