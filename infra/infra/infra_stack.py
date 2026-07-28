@@ -45,7 +45,7 @@ class TelegramBotInfraStack(Stack):
         task_execution_role.add_to_policy(iam.PolicyStatement(
             effect=iam.Effect.ALLOW,
             actions=["secretsmanager:GetSecretValue"],
-            resources=[secret_arn.value_as_string]))
+            resources=[f"arn:aws:secretsmanager:{self.region}:{self.account}:secret:dev/telegramBot*"]))
 
         # Task Role - application runtime permissions
         task_role = iam.Role(
