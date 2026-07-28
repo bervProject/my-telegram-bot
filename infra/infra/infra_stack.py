@@ -5,9 +5,9 @@ from aws_cdk import (
     CfnOutput,
     RemovalPolicy,
     aws_ecr as ecr,
-    aws_secretsmanager as secretsmanager,
+    aws_ecs as ecs,
+    aws_iam as iam,
 )
-import aws_cdk.aws_apprunner_alpha as apprunner
 
 from constructs import Construct
 
@@ -19,26 +19,97 @@ class TelegramBotInfraStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # The code that defines your stack goes here
-
-        # example resource
+        # Parameters
         ecr_bot = ecr.Repository.from_repository_name(
             self, "telegram-bot-ecr", "telegram-bot")
         image_tag = CfnParameter(
             self, "imageTag", type="String", description="Target tag")
-        app_runner_output = apprunner.Service(self, "telegram-bot-apprunner",
-                                              source=apprunner.Source.from_ecr(
-                                                  repository=ecr_bot,
-                                                  image_configuration=apprunner.ImageConfiguration(port=80),
-                                                  tag_or_digest=image_tag.value_as_string
-                                              ))
-        secrets = secretsmanager.Secret.from_secret_name_v2(self, "secret-telegram-bot", "dev/telegramBot")
-        app_runner_output.add_secret("TELEGRAM_TOKEN", apprunner.Secret.from_secrets_manager(secret=secrets, field="TELEGRAM_TOKEN"))
-        app_runner_output.add_secret("SECRET_KEY", apprunner.Secret.from_secrets_manager(secret=secrets, field="SECRET_KEY"))
-        app_runner_output.add_secret("CLIENT_SECRET", apprunner.Secret.from_secrets_manager(secret=secrets, field="CLIENT_SECRET"))
-        app_runner_output.add_secret("CLIENT_ID", apprunner.Secret.from_secrets_manager(secret=secrets, field="CLIENT_ID"))
-        app_runner_output.add_secret("PUBLIC_URL", apprunner.Secret.from_secrets_manager(secret=secrets, field="PUBLIC_URL"))
-        CfnOutput(self, "apprunner-url", value=app_runner_output.service_url)
+        secret_arn = CfnParameter(
+            self, "secretArn", type="String",
+            description="Full ARN of the Secrets Manager secret")
+
+        # Task Execution Role - pull images, write logs, read secrets
+        task_execution_role = iam.Role(
+            self, "TelegramBotTaskExecutionRole",
+            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+            role_name="TelegramBotEcsTaskExecutionRole",
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AmazonECSTaskExecutionRolePolicy")
+            ])
+        task_execution_role.add_to_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+            resources=[f"arn:aws:logs:{self.region}:{self.account}:log-group:/aws/ecs/telegram-bot-express*"]))
+        task_execution_role.add_to_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=["secretsmanager:GetSecretValue"],
+            resources=[f"arn:aws:secretsmanager:{self.region}:{self.account}:secret:dev/telegramBot*"]))
+
+        # Task Role - application runtime permissions
+        task_role = iam.Role(
+            self, "TelegramBotTaskRole",
+            assumed_by=iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+            role_name="TelegramBotEcsTaskRole")
+
+        # Infrastructure Role - ECS Express Mode managed infrastructure
+        infrastructure_role = iam.Role(
+            self, "TelegramBotInfrastructureRole",
+            assumed_by=iam.ServicePrincipal("ecs.amazonaws.com"),
+            role_name="TelegramBotEcsInfrastructureRole",
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AmazonECSInfrastructureRoleforExpressGatewayServices")
+            ])
+
+        image_uri = f"{ecr_bot.repository_uri}:{image_tag.value_as_string}"
+
+        # Secrets from Secrets Manager
+        express_secrets = [
+            ecs.CfnExpressGatewayService.SecretProperty(
+                name=name,
+                value_from=f"{secret_arn.value_as_string}:{name}::")
+            for name in [
+                "TELEGRAM_TOKEN",
+                "SECRET_KEY",
+                "CLIENT_SECRET",
+                "CLIENT_ID",
+                "PUBLIC_URL",
+            ]
+        ]
+
+        # ECS Express Mode Service
+        express_service = ecs.CfnExpressGatewayService(
+            self, "TelegramBotExpressService",
+            service_name="telegram-bot-express-service",
+            execution_role_arn=task_execution_role.role_arn,
+            infrastructure_role_arn=infrastructure_role.role_arn,
+            task_role_arn=task_role.role_arn,
+            cpu="256",
+            memory="512",
+            health_check_path="/",
+            primary_container=ecs.CfnExpressGatewayService.PrimaryContainerProperty(
+                image=image_uri,
+                container_port=80,
+                environment=[
+                    ecs.CfnExpressGatewayService.KeyValuePairProperty(
+                        name="FLASK_ENV", value="production")
+                ],
+                secrets=express_secrets,
+                aws_logs_configuration=ecs.CfnExpressGatewayService.AwsLogsConfigurationProperty(
+                    log_group="/aws/ecs/telegram-bot-express",
+                    log_stream_prefix="telegram-bot")),
+            scaling_target=ecs.CfnExpressGatewayService.ScalingTargetProperty(
+                auto_scaling_metric="REQUEST_COUNT_PER_TARGET",
+                auto_scaling_target_value=20,
+                min_task_count=1,
+                max_task_count=3))
+
+        express_service.node.add_dependency(task_execution_role)
+        express_service.node.add_dependency(task_role)
+        express_service.node.add_dependency(infrastructure_role)
+
+        CfnOutput(self, "ServiceName", value=express_service.service_name or "telegram-bot-express-service")
 
 
 '''

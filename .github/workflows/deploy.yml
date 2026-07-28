@@ -13,20 +13,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.13'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6 # More information on this action can be found below in the 'AWS Credentials' section
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ secrets.AWS_ROLE_SESSION_NAME }}
           aws-region: 'ap-southeast-1'
-      - name: Install CDK
-        run: |
-          npm install -g aws-cdk
-          cdk doctor
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -51,7 +43,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-  deploy-apprunner:
+  deploy-ecs:
     runs-on: ubuntu-24.04
     environment: production
     needs: deploy-image
@@ -60,12 +52,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v6
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
         with:
-          node-version: '22.x'
+          python-version: '3.13'
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6 # More information on this action can be found below in the 'AWS Credentials' section
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-session-name: ${{ secrets.AWS_ROLE_SESSION_NAME }}
@@ -74,16 +66,11 @@ jobs:
         run: |
           npm install -g aws-cdk
           cdk doctor
-      - name: Prepare App Runner
-        uses: bervProject/prepare-apprunner-action@0.1.5
-        with:
-          arn: ${{ secrets.ARN }}
-          region: 'ap-southeast-1'
       - name: Deploy Infra
         working-directory: 'infra'
         run: |
           python -m venv .venv
           source .venv/bin/activate
           pip install -r requirements.txt
-          cdk deploy TelegramBotInfraStack --parameters "imageTag=sha-${{ github.sha }}" --require-approval never
+          cdk deploy TelegramBotInfraStack --parameters "imageTag=sha-${{ github.sha }}" --parameters "secretArn=${{ secrets.SECRET_ARN }}" --require-approval never
 
