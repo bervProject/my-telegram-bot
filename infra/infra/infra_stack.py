@@ -93,7 +93,10 @@ class TelegramBotInfraStack(Stack):
             primary_container={
                 "image": image_uri,
                 "containerPort": 80,
-                "environment": [{"name": "FLASK_ENV", "value": "production"}],
+                "environment": [
+                    {"name": "FLASK_ENV", "value": "production"},
+                    {"name": "PORT", "value": "80"},
+                ],
                 "secrets": express_secrets,
                 "awsLogsConfiguration": {
                     "logGroup": "/aws/ecs/telegram-bot-express",
