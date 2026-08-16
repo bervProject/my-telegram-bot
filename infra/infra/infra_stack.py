@@ -63,59 +63,59 @@ class TelegramBotInfraStack(Stack):
                     "service-role/AmazonECSInfrastructureRoleforExpressGatewayServices")
             ])
 
-        image_uri = f"{ecr_bot.repository_uri}:{image_tag.value_as_string}"
+        # image_uri = f"{ecr_bot.repository_uri}:{image_tag.value_as_string}"
 
-        # Secrets from Secrets Manager
-        # valueFrom format: <secret-arn>:<json-key>::
-        express_secrets = [
-            {"name": name, "valueFrom": Fn.sub(
-                "${SecretArn}:" + name + "::",
-                {"SecretArn": secret_arn.value_as_string})}
-            for name in [
-                "TELEGRAM_TOKEN",
-                "SECRET_KEY",
-                "CLIENT_SECRET",
-                "CLIENT_ID",
-                "PUBLIC_URL",
-            ]
-        ]
+        # # Secrets from Secrets Manager
+        # # valueFrom format: <secret-arn>:<json-key>::
+        # express_secrets = [
+        #     {"name": name, "valueFrom": Fn.sub(
+        #         "${SecretArn}:" + name + "::",
+        #         {"SecretArn": secret_arn.value_as_string})}
+        #     for name in [
+        #         "TELEGRAM_TOKEN",
+        #         "SECRET_KEY",
+        #         "CLIENT_SECRET",
+        #         "CLIENT_ID",
+        #         "PUBLIC_URL",
+        #     ]
+        # ]
 
-        # ECS Express Mode Service
-        express_service = ecs.CfnExpressGatewayService(
-            self, "TelegramBotExpressService",
-            service_name="telegram-bot-express-service",
-            execution_role_arn=task_execution_role.role_arn,
-            infrastructure_role_arn=infrastructure_role.role_arn,
-            task_role_arn=task_role.role_arn,
-            cpu="256",
-            memory="512",
-            health_check_path="/",
-            primary_container={
-                "image": image_uri,
-                "containerPort": 80,
-                "environment": [
-                    {"name": "FLASK_ENV", "value": "production"},
-                    {"name": "PORT", "value": "80"},
-                ],
-                "secrets": express_secrets,
-                "awsLogsConfiguration": {
-                    "logGroup": "/aws/ecs/telegram-bot-express",
-                    "logStreamPrefix": "telegram-bot",
-                },
-            },
-            scaling_target={
-                "autoScalingMetric": "REQUEST_COUNT_PER_TARGET",
-                "autoScalingTargetValue": 20,
-                "minTaskCount": 1,
-                "maxTaskCount": 3,
-            })
+        # # ECS Express Mode Service
+        # express_service = ecs.CfnExpressGatewayService(
+        #     self, "TelegramBotExpressService",
+        #     service_name="telegram-bot-express-service",
+        #     execution_role_arn=task_execution_role.role_arn,
+        #     infrastructure_role_arn=infrastructure_role.role_arn,
+        #     task_role_arn=task_role.role_arn,
+        #     cpu="256",
+        #     memory="512",
+        #     health_check_path="/",
+        #     primary_container={
+        #         "image": image_uri,
+        #         "containerPort": 80,
+        #         "environment": [
+        #             {"name": "FLASK_ENV", "value": "production"},
+        #             {"name": "PORT", "value": "80"},
+        #         ],
+        #         "secrets": express_secrets,
+        #         "awsLogsConfiguration": {
+        #             "logGroup": "/aws/ecs/telegram-bot-express",
+        #             "logStreamPrefix": "telegram-bot",
+        #         },
+        #     },
+        #     scaling_target={
+        #         "autoScalingMetric": "REQUEST_COUNT_PER_TARGET",
+        #         "autoScalingTargetValue": 20,
+        #         "minTaskCount": 1,
+        #         "maxTaskCount": 3,
+        #     })
 
-        express_service.node.add_dependency(task_execution_role)
-        express_service.node.add_dependency(task_role)
-        express_service.node.add_dependency(infrastructure_role)
+        # express_service.node.add_dependency(task_execution_role)
+        # express_service.node.add_dependency(task_role)
+        # express_service.node.add_dependency(infrastructure_role)
 
-        CfnOutput(self, "ServiceName", value=express_service.service_name or "telegram-bot-express-service")
-        CfnOutput(self, "ServiceArn", value=express_service.attr_service_arn)
+        # CfnOutput(self, "ServiceName", value=express_service.service_name or "telegram-bot-express-service")
+        # CfnOutput(self, "ServiceArn", value=express_service.attr_service_arn)
 
 
 '''
